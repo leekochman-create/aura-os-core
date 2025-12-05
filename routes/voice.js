@@ -1,7 +1,5 @@
 import express from "express";
 import axios from "axios";
-import FormData from "form-data";
-import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
@@ -9,63 +7,44 @@ router.post("/create", async (req, res) => {
   try {
     console.log("📥 Create Voice REQUEST:", req.body);
 
-    const { twin_id, audio_url, name } = req.body;
+    const { twin_id, audio_url } = req.body;
 
-    if (!twin_id || !audio_url || !name) {
-      return res.status(400).json({
-        error: "Missing twin_id, audio_url or name",
-      });
+    if (!twin_id || !audio_url) {
+      return res.status(400).json({ error: "Missing twin_id or audio_url" });
     }
 
-    console.log("⬇️ Downloading audio…");
-
-    // 1) Download audio file Buffer
+    // ====== DOWNLOAD AUDIO FILE ======
     const audioResponse = await axios.get(audio_url, {
       responseType: "arraybuffer",
     });
 
     const audioBuffer = audioResponse.data;
 
-    console.log("🎙 Preparing FormData…");
-
-    // 2) Create FormData with required fields
-    const form = new FormData();
-
-    form.append("name", name);           // REQUIRED
-    form.append("description", name);    // optional but helps
-    form.append("files", audioBuffer, {
-      filename: `${name}.mp3`,
-      contentType: "audio/mpeg",
-    });
-
-    console.log("📤 Sending to ElevenLabs…");
-
-    // 3) Send to ElevenLabs
-    const elevenResp = await axios.post(
-      "https://api.elevenlabs.io/v1/voices/add",
-      form,
+    // ====== SEND AUDIO TO OPENAI WHISPER FOR VOICE EMBEDDING ======
+    const openaiResp = await axios.post(
+      "https://api.openai.com/v1/audio/embeddings",
+      audioBuffer,
       {
         headers: {
-          ...form.getHeaders(),
-          "xi-api-key": process.env.ELEVENLABS_API_KEY,
-        },
+          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "audio/mpeg"
+        }
       }
     );
 
-    const voice_id = elevenResp.data.voice_id;
+    const voice_vector = openaiResp.data.embedding;
 
-    console.log("🎉 Voice created successfully:", voice_id);
+    console.log("🎤 Voice Embedding Created:", voice_vector.length);
 
-    // 4) Response back to Bubble
-    return res.status(200).json({
+    // ====== RETURN RESULT ======
+    res.status(200).json({
       success: true,
-      voice_id,
       twin_id,
-      name,
+      voice_vector
     });
 
   } catch (err) {
-    console.error("🔥 ERROR creating voice:", err.response?.data || err);
+    console.error("🔥 Voice Error:", err.response?.data || err.message);
     res.status(500).json({
       error: "Voice creation failed",
       details: err.response?.data || err.message,
