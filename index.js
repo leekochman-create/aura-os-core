@@ -15,7 +15,9 @@ app.use(cors());
 app.use(express.json());
 
 // ====== ROUTES ======
+// עכשיו הראוט הראשי הוא פשוט /createTwin
 app.use("/createTwin", createTwinRoute);
+
 app.use("/chat", chatRoute);
 app.use("/speak", speakRoute);
 app.use("/uploadAudio", uploadAudioRoute);
