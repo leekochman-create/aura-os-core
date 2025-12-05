@@ -87,8 +87,8 @@ router.post(
             user_id,
             name,
             bio,
-            image_url: imageUrl,
-            audio_url: audioUrl,
+            image_Url: imageUrl,  // ← EXACT כמו בסופאבייס
+            audio_Url: audioUrl,  // ← EXACT כמו בסופאבייס
           },
         ])
         .select()
