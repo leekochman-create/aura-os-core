@@ -8,21 +8,22 @@ import speakRoute from "./routes/speak.js";
 import uploadAudioRoute from "./routes/uploadAudio.js";
 import uploadImageRoute from "./routes/uploadImage.js";
 import videoRoute from "./routes/video.js";
+import voiceRoute from "./routes/voice.js";   // ⭐ חדש — יצירת קול באילבן
 
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true }));
 
 // ====== ROUTES ======
-// עכשיו הראוט הראשי הוא פשוט /createTwin
-app.use("/createTwin", createTwinRoute);
-
-app.use("/chat", chatRoute);
-app.use("/speak", speakRoute);
-app.use("/uploadAudio", uploadAudioRoute);
-app.use("/uploadImage", uploadImageRoute);
-app.use("/video", videoRoute);
+app.use("/createTwin", createTwinRoute);        // יצירת תאום
+app.use("/voice", voiceRoute);                 // ⭐ יצירת קול ElevenLabs
+app.use("/chat", chatRoute);                   // צ'אט AI
+app.use("/speak", speakRoute);                 // דיבור AI
+app.use("/uploadAudio", uploadAudioRoute);     // העלאת אודיו
+app.use("/uploadImage", uploadImageRoute);     // העלאת תמונה
+app.use("/video", videoRoute);                 // יצירת וידאו AI
 
 // ====== TEST ROUTE ======
 app.get("/", (req, res) => {
