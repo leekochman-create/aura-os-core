@@ -3,11 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
-router.post("/createTwin", async (req, res) => {
+//  POST /createTwin   ← שים לב!! אין כאן createTwin שוב
+router.post("/", async (req, res) => {
   try {
     console.log("📥 Create Twin REQUEST:", req.body);
 
-    const { name, bio, user_id, image_file, audio_file } = req.body;
+    const { name, bio, user_id, image_url, audio_url } = req.body;
 
     // ====== VALIDATION ======
     if (!name || !bio || !user_id) {
@@ -15,12 +16,12 @@ router.post("/createTwin", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (!image_file || !audio_file) {
+    if (!image_url || !audio_url) {
       console.log("❌ Missing media URLs");
       return res.status(400).json({ error: "Missing media URLs" });
     }
 
-    // ====== STRUCTURED TWIN DATA ======
+    // ====== CREATE STRUCTURED TWIN ======
     const twinId = uuidv4();
 
     const newTwin = {
@@ -28,24 +29,23 @@ router.post("/createTwin", async (req, res) => {
       name,
       bio,
       user_id,
-      image_url: image_file,   // <–– URL בלבד
-      audio_url: audio_file,   // <–– URL בלבד
-      created_at: new Date().toISOString()
+      image_url,
+      audio_url,
+      created_at: new Date().toISOString(),
     };
 
-    console.log("✅ Twin Created:", newTwin);
+    console.log("✅ Twin Created Successfully:", newTwin);
 
-    // ====== RETURN SUCCESS ======
     return res.status(200).json({
       success: true,
-      twin: newTwin
+      twin: newTwin,
     });
 
   } catch (err) {
     console.error("🔥 SERVER ERROR:", err);
     return res.status(500).json({
       error: "Server error",
-      details: err.message
+      details: err.message,
     });
   }
 });
