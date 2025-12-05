@@ -1,7 +1,6 @@
 import express from "express";
 import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
-import FormData from "form-data";
 
 const router = express.Router();
 
@@ -17,10 +16,9 @@ const upload = multer({ storage });
 
 // ===============================================
 // POST /createTwin
-// Supports: image_file + audio_file + name + bio + user_id
 // ===============================================
 router.post(
-  "/createTwin",
+  "/",
   upload.fields([
     { name: "image_file", maxCount: 1 },
     { name: "audio_file", maxCount: 1 },
@@ -43,7 +41,7 @@ router.post(
 
         const imgPath = `twins/${user_id}/image-${Date.now()}.png`;
 
-        const { data: imgUpload, error: imgError } = await supabase.storage
+        const { error: imgError } = await supabase.storage
           .from("twins")
           .upload(imgPath, imgFile.buffer, {
             contentType: imgFile.mimetype,
@@ -66,7 +64,7 @@ router.post(
 
         const audioPath = `twins/${user_id}/audio-${Date.now()}.mp3`;
 
-        const { data: audioUpload, error: audioError } = await supabase.storage
+        const { error: audioError } = await supabase.storage
           .from("twins")
           .upload(audioPath, audioFile.buffer, {
             contentType: audioFile.mimetype,
