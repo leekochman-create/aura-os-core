@@ -1,11 +1,11 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
+import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
 /**
  * POST /createTwin
- * יוצרת תאום חדש ומחזירה את אובייקט התאום ישירות (כדי שה-API של Bubble יעבוד)
  */
 router.post("/", async (req, res) => {
   try {
@@ -15,16 +15,14 @@ router.post("/", async (req, res) => {
 
     // ====== VALIDATION ======
     if (!name || !bio || !user_id) {
-      console.log("❌ Missing required fields");
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     if (!image_url || !audio_url) {
-      console.log("❌ Missing media URLs");
       return res.status(400).json({ error: "Missing media URLs" });
     }
 
-    // ====== CREATE TWIN OBJECT ======
+    // ====== CREATE STRUCTURED TWIN ======
     const twinId = uuidv4();
 
     const newTwin = {
@@ -37,10 +35,22 @@ router.post("/", async (req, res) => {
       created_at: new Date().toISOString(),
     };
 
-    console.log("✅ Twin Created Successfully:", newTwin);
+    // ====== SAVE TO SUPABASE ======
+    const { data, error } = await supabase
+      .from("twins")
+      .insert([newTwin])
+      .select()
+      .single();
 
-    // 🔥 חשוב! מחזירים *רק* את התאום — ללא success וללא עטיפות
-    return res.status(200).json(newTwin);
+    if (error) {
+      console.error("❌ Supabase Insert Error:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    console.log("✅ Twin Saved to Supabase:", data);
+
+    // 🔥 מחזירים לבאבל אובייקט אחד נקי
+    return res.status(200).json(data);
 
   } catch (err) {
     console.error("🔥 SERVER ERROR:", err);
