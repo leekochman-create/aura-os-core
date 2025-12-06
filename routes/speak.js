@@ -1,14 +1,44 @@
-import { generateVoice } from "../services/eleven.js";
+import express from "express";
+import OpenAI from "openai";
 
-export default async function speak(req, res) {
+const router = express.Router();
+
+// יצירת לקוח OpenAI
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+router.post("/", async (req, res) => {
   try {
-    const { text, voice_id } = req.body;
+    console.log("📥 Speak REQUEST:", req.body);
 
-    const audio = await generateVoice(text, voice_id);
+    const { text } = req.body;
 
-    res.set("Content-Type", "audio/mpeg");
-    res.send(audio);
+    if (!text) {
+      return res.status(400).json({ error: "Missing text" });
+    }
+
+    // ====== יצירת אודיו ======
+    const response = await client.audio.speech.create({
+      model: "gpt-4o-mini-tts",
+      voice: "alloy",
+      input: text,
+      format: "mp3",
+    });
+
+    // התשובה חוזרת כ־ArrayBuffer
+    const audioBuffer = Buffer.from(await response.arrayBuffer());
+
+    res.set({
+      "Content-Type": "audio/mpeg",
+      "Content-Length": audioBuffer.length,
+    });
+
+    return res.send(audioBuffer);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("🔥 ERROR in /speak:", err);
+    return res.status(500).json({ error: err.message });
   }
-}
+});
+
+export default router;
