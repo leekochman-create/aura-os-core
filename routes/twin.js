@@ -14,15 +14,16 @@ router.get("/", async (req, res) => {
       return res.status(400).json({ error: "Missing twin id" });
     }
 
-    // שאילתא שתחזיר שורה אחת בלבד
+    // --- שורה אחת בלבד --- //
     const { data, error } = await supabase
       .from("twins")
       .select("*")
       .eq("id", twinId)
-      .single();
+      .limit(1)     // תמיד מחזיר רק אופציה אחת
+      .single();    // מכריח להחזיר אובייקט ולא רשימה
 
     if (error) {
-      console.error("❌ Supabase Error:", error);
+      console.error("❌ Supabase Twin Error:", error);
       return res.status(500).json({ error: error.message });
     }
 
@@ -33,7 +34,7 @@ router.get("/", async (req, res) => {
     return res.json(data);
 
   } catch (err) {
-    console.error("🔥 Twin Route Error:", err);
+    console.error("🔥 Server Twin Error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
