@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 
 // ==== ROUTES ====
-import createTwinRoute from "./routes/createTwin.js";
-import speakRoute from "./routes/speak.js";
-import twinRoute from "./routes/twin.js";   // <<< חדש – שליפת תאום לפי ID
+import createTwinRoute from "./routes/createTwin.js";   // יצירת תאום
+import speakRoute from "./routes/speak.js";             // יצירת קול OPENAI
+import twinRoute from "./routes/twin.js";               // שליפת תאום לפי ID
 
 const app = express();
 
@@ -14,9 +14,9 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ====== ROUTES ======
-app.use("/createTwin", createTwinRoute);   // יצירת תאום
-app.use("/speak", speakRoute);             // יצירת קול OPENAI
-app.use("/twin", twinRoute);               // <<< חדש – החזרת תאום לפי ID
+app.use("/createTwin", createTwinRoute);   // POST יצירת תאום
+app.use("/speak", speakRoute);             // POST יצירת קול
+app.use("/twin", twinRoute);               // GET החזרת תאום לפי ID
 
 // ====== TEST ROUTE ======
 app.get("/", (req, res) => {
