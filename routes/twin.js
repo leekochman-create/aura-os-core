@@ -3,15 +3,18 @@ import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
-// GET /twin?id=xxxx
+/**
+ * GET /twin?id=xxxx
+ */
 router.get("/", async (req, res) => {
   try {
     const twinId = req.query.id;
 
     if (!twinId) {
-      return res.status(400).json({ error: "Missing twin ID" });
+      return res.status(400).json({ error: "Missing twin id" });
     }
 
+    // שאילתא שתחזיר שורה אחת בלבד
     const { data, error } = await supabase
       .from("twins")
       .select("*")
@@ -19,7 +22,7 @@ router.get("/", async (req, res) => {
       .single();
 
     if (error) {
-      console.error("❌ Supabase error:", error);
+      console.error("❌ Supabase Error:", error);
       return res.status(500).json({ error: error.message });
     }
 
@@ -27,12 +30,11 @@ router.get("/", async (req, res) => {
       return res.status(404).json({ error: "Twin not found" });
     }
 
-    console.log("📤 Twin fetched:", data);
-    res.json(data);
+    return res.json(data);
 
   } catch (err) {
-    console.error("❌ GET Twin Error:", err);
-    res.status(500).json({ error: "Server error" });
+    console.error("🔥 Twin Route Error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
