@@ -4,6 +4,7 @@ import cors from "cors";
 // ==== ROUTES ====
 import createTwinRoute from "./routes/createTwin.js";
 import speakRoute from "./routes/speak.js";
+import twinRoute from "./routes/twin.js";   // <<< חדש – שליפת תאום לפי ID
 
 const app = express();
 
@@ -13,8 +14,9 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ====== ROUTES ======
-app.use("/createTwin", createTwinRoute);   // יצירת תאום (URL בלבד)
-app.use("/speak", speakRoute);             // יצירת קול בטכנולוגיית OPENAI
+app.use("/createTwin", createTwinRoute);   // יצירת תאום
+app.use("/speak", speakRoute);             // יצירת קול OPENAI
+app.use("/twin", twinRoute);               // <<< חדש – החזרת תאום לפי ID
 
 // ====== TEST ROUTE ======
 app.get("/", (req, res) => {
