@@ -33,39 +33,72 @@ async function uploadToSupabase(folder, file) {
 // ====== UPLOAD IMAGE ======
 router.post("/image", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file provided" });
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "No file provided" });
+    }
 
     const url = await uploadToSupabase("images", req.file);
-    res.json({ url });
+
+    return res.status(200).json({
+      success: true,
+      file_url: url
+    });
+
   } catch (err) {
     console.error("Upload image error:", err);
-    res.status(500).json({ error: "Upload failed" });
+    return res.status(500).json({
+      success: false,
+      error: "Upload failed",
+      details: err.message
+    });
   }
 });
 
 // ====== UPLOAD AUDIO ======
 router.post("/audio", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file provided" });
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "No file provided" });
+    }
 
     const url = await uploadToSupabase("audio", req.file);
-    res.json({ url });
+
+    return res.status(200).json({
+      success: true,
+      file_url: url
+    });
+
   } catch (err) {
     console.error("Upload audio error:", err);
-    res.status(500).json({ error: "Upload failed" });
+    return res.status(500).json({
+      success: false,
+      error: "Upload failed",
+      details: err.message
+    });
   }
 });
 
 // ====== UPLOAD VIDEO ======
 router.post("/video", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file provided" });
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "No file provided" });
+    }
 
     const url = await uploadToSupabase("video", req.file);
-    res.json({ url });
+
+    return res.status(200).json({
+      success: true,
+      file_url: url
+    });
+
   } catch (err) {
     console.error("Upload video error:", err);
-    res.status(500).json({ error: "Upload failed" });
+    return res.status(500).json({
+      success: false,
+      error: "Upload failed",
+      details: err.message
+    });
   }
 });
 
