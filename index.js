@@ -11,14 +11,22 @@ const app = express();
 
 // ====== MIDDLEWARE ======
 app.use(cors());
+
+// ❗❗ חשוב: לא מפעילים express.json לפני מסלולי העלאת קבצים!
+// אחרת multer לא יקבל את הקובץ.
+
+// ====== ROUTES THAT RECEIVE FILES FIRST ======
+app.use("/upload", uploadRoute);           // POST העלאת קבצים ל-Supabase
+
+// ====== JSON ROUTES ======
+// עכשיו מותר להפעיל JSON כי אין עוד מסלולים עם קבצים
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// ====== ROUTES ======
+// ====== OTHER ROUTES ======
 app.use("/createTwin", createTwinRoute);   // POST יצירת תאום
 app.use("/speak", speakRoute);             // POST יצירת קול
 app.use("/twin", twinRoute);               // GET תאום לפי ID
-app.use("/upload", uploadRoute);           // POST העלאת קבצים ל-Supabase
 
 // ====== TEST ROUTE ======
 app.get("/", (req, res) => {
