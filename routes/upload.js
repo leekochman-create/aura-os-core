@@ -11,11 +11,11 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// הגדרת Multer
+// Multer – קבלת קבצים בזיכרון
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// פונקציה להעלאה לסופאבייס
+// פונקציה העלאה לסופאבייס
 async function uploadToSupabase(folder, file) {
   const filename = `${uuidv4()}-${file.originalname}`;
 
@@ -30,75 +30,70 @@ async function uploadToSupabase(folder, file) {
   return `${process.env.SUPABASE_URL}/storage/v1/object/public/twins/${folder}/${filename}`;
 }
 
-// ====== UPLOAD IMAGE ======
+/* ================================
+   UPLOAD IMAGE
+================================ */
 router.post("/image", upload.single("file"), async (req, res) => {
   try {
+    console.log("📥 Incoming upload /image");
+    console.log("📸 File received:", req.file);
+
     if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file provided" });
+      return res
+        .status(400)
+        .json({ success: false, error: "No file provided" });
     }
 
     const url = await uploadToSupabase("images", req.file);
 
-    return res.status(200).json({
-      success: true,
-      file_url: url
-    });
-
+    res.json({ success: true, url });
   } catch (err) {
-    console.error("Upload image error:", err);
-    return res.status(500).json({
-      success: false,
-      error: "Upload failed",
-      details: err.message
-    });
+    console.error("❌ Upload image error:", err);
+    res.status(500).json({ success: false, error: "Upload failed" });
   }
 });
 
-// ====== UPLOAD AUDIO ======
+/* ================================
+   UPLOAD AUDIO
+================================ */
 router.post("/audio", upload.single("file"), async (req, res) => {
   try {
+    console.log("🎤 Incoming upload /audio");
+    console.log("📁 File:", req.file);
+
     if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file provided" });
+      return res
+        .status(400)
+        .json({ success: false, error: "No file provided" });
     }
 
     const url = await uploadToSupabase("audio", req.file);
-
-    return res.status(200).json({
-      success: true,
-      file_url: url
-    });
-
+    res.json({ success: true, url });
   } catch (err) {
-    console.error("Upload audio error:", err);
-    return res.status(500).json({
-      success: false,
-      error: "Upload failed",
-      details: err.message
-    });
+    console.error("❌ Upload audio error:", err);
+    res.status(500).json({ success: false, error: "Upload failed" });
   }
 });
 
-// ====== UPLOAD VIDEO ======
+/* ================================
+   UPLOAD VIDEO
+================================ */
 router.post("/video", upload.single("file"), async (req, res) => {
   try {
+    console.log("🎬 Incoming upload /video");
+    console.log("📁 File:", req.file);
+
     if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file provided" });
+      return res
+        .status(400)
+        .json({ success: false, error: "No file provided" });
     }
 
     const url = await uploadToSupabase("video", req.file);
-
-    return res.status(200).json({
-      success: true,
-      file_url: url
-    });
-
+    res.json({ success: true, url });
   } catch (err) {
-    console.error("Upload video error:", err);
-    return res.status(500).json({
-      success: false,
-      error: "Upload failed",
-      details: err.message
-    });
+    console.error("❌ Upload video error:", err);
+    res.status(500).json({ success: false, error: "Upload failed" });
   }
 });
 
