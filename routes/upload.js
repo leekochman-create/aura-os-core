@@ -15,13 +15,11 @@ const supabase = createClient(
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// ===============================
-// Upload Helper
-// ===============================
+// Upload function
 async function uploadToSupabase(folder, file) {
   const filename = `${uuidv4()}-${file.originalname}`;
 
-  // Upload to bucket
+  // Upload file
   const { error: uploadError } = await supabase.storage
     .from("twins")
     .upload(`${folder}/${filename}`, file.buffer, {
@@ -31,79 +29,67 @@ async function uploadToSupabase(folder, file) {
 
   if (uploadError) throw uploadError;
 
-  // Public URL
+  // Fetch public URL
   const { data: publicData, error: urlError } = supabase.storage
     .from("twins")
     .getPublicUrl(`${folder}/${filename}`);
 
   if (urlError) throw urlError;
 
-  console.log("✔️ Upload success →", publicData.publicUrl);
-
+  console.log("✔️ Uploaded:", publicData.publicUrl);
   return publicData.publicUrl;
 }
 
-// ===============================
-// IMAGE Upload
-// ===============================
+// ===========================
+// IMAGE
+// ===========================
 router.post("/image", upload.single("file"), async (req, res) => {
   try {
-    console.log("📥 Upload IMAGE request", req.file);
-
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file" });
-    }
+    if (!req.file) return res.status(400).send("NO_FILE");
 
     const url = await uploadToSupabase("images", req.file);
-    res.json({ success: true, url });
+
+    // Bubble requires RAW URL — NOT JSON
+    return res.status(200).send(url);
 
   } catch (err) {
-    console.error("❌ Image upload error:", err);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("IMAGE ERROR:", err);
+    return res.status(500).send("ERROR");
   }
 });
 
-// ===============================
-// AUDIO Upload
-// ===============================
+// ===========================
+// AUDIO
+// ===========================
 router.post("/audio", upload.single("file"), async (req, res) => {
   try {
-    console.log("🎤 Upload AUDIO request", req.file);
-
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file" });
-    }
+    if (!req.file) return res.status(400).send("NO_FILE");
 
     const url = await uploadToSupabase("audio", req.file);
-    res.json({ success: true, url });
+
+    return res.status(200).send(url);
 
   } catch (err) {
-    console.error("❌ Audio upload error:", err);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("AUDIO ERROR:", err);
+    return res.status(500).send("ERROR");
   }
 });
 
-// ===============================
-// VIDEO Upload
-// ===============================
+// ===========================
+// VIDEO
+// ===========================
 router.post("/video", upload.single("file"), async (req, res) => {
   try {
-    console.log("🎬 Upload VIDEO request", req.file);
-
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file" });
-    }
+    if (!req.file) return res.status(400).send("NO_FILE");
 
     const url = await uploadToSupabase("video", req.file);
-    res.json({ success: true, url });
+
+    return res.status(200).send(url);
 
   } catch (err) {
-    console.error("❌ Video upload error:", err);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("VIDEO ERROR:", err);
+    return res.status(500).send("ERROR");
   }
 });
 
-// ===============================
-// EXPORT DEFAULT  ← ← הכי חשוב לתיקון השגיאה ב־Render!
-// ===============================
 export default router;
