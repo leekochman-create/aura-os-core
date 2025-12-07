@@ -2,9 +2,10 @@ import express from "express";
 import cors from "cors";
 
 // ==== ROUTES ====
-import createTwinRoute from "./routes/createTwin.js";   // יצירת תאום
-import speakRoute from "./routes/speak.js";             // יצירת קול OPENAI
-import twinRoute from "./routes/twin.js";               // שליפת תאום לפי ID
+import createTwinRoute from "./routes/createTwin.js";     // יצירת תאום
+import speakRoute from "./routes/speak.js";               // יצירת קול OPENAI
+import twinRoute from "./routes/twin.js";                 // קבלת תאום לפי ID
+import uploadRoute from "./routes/upload.js";             // העלאת קבצים → תמונה/אודיו/וידאו
 
 const app = express();
 
@@ -16,7 +17,8 @@ app.use(express.urlencoded({ extended: true }));
 // ====== ROUTES ======
 app.use("/createTwin", createTwinRoute);   // POST יצירת תאום
 app.use("/speak", speakRoute);             // POST יצירת קול
-app.use("/twin", twinRoute);               // GET החזרת תאום לפי ID
+app.use("/twin", twinRoute);               // GET תאום לפי ID
+app.use("/upload", uploadRoute);           // POST העלאת קבצים ל-Supabase
 
 // ====== TEST ROUTE ======
 app.get("/", (req, res) => {
