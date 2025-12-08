@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
   try {
     console.log("📥 Create Twin REQUEST:", req.body);
 
-    const { name, bio, user_id, image_url, audio_url } = req.body;
+    const { name, bio, user_id, image_url, audio_url, unique_id } = req.body;
 
     // ====== VALIDATION ======
     if (!name || !bio || !user_id) {
@@ -22,11 +22,16 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Missing media URLs" });
     }
 
+    if (!unique_id) {
+      return res.status(400).json({ error: "Missing unique_id from Bubble" });
+    }
+
     // ====== CREATE STRUCTURED TWIN ======
-    const twinId = uuidv4();
+    const twinId = uuidv4(); // internal row id
 
     const newTwin = {
       id: twinId,
+      unique_id,      // ←←← שומר מה שבאבל שלח
       name,
       bio,
       user_id,
@@ -49,7 +54,6 @@ router.post("/", async (req, res) => {
 
     console.log("✅ Twin Saved to Supabase:", data);
 
-    // 🔥 מחזירים לבאבל אובייקט אחד נקי
     return res.status(200).json(data);
 
   } catch (err) {
