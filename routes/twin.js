@@ -4,23 +4,25 @@ import { supabase } from "../services/supabase.js";
 const router = express.Router();
 
 /**
- * GET /twin?id=xxxx
+ * GET /twin?id=XXXX
+ * GET /twin/XXXX   ← תמיכה גם במסלול כזה
  */
-router.get("/", async (req, res) => {
+router.get("/:id?", async (req, res) => {
   try {
-    const twinId = req.query.id;
+    const twinId = req.params.id || req.query.id;
 
     if (!twinId) {
       return res.status(400).json({ error: "Missing twin id" });
     }
 
-    // --- שורה אחת בלבד --- //
+    console.log("🔎 Fetching twin:", twinId);
+
     const { data, error } = await supabase
       .from("twins")
       .select("*")
       .eq("id", twinId)
-      .limit(1)     // תמיד מחזיר רק אופציה אחת
-      .single();    // מכריח להחזיר אובייקט ולא רשימה
+      .limit(1)
+      .single();
 
     if (error) {
       console.error("❌ Supabase Twin Error:", error);
