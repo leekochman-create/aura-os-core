@@ -1,73 +1,69 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
-import { supabase } from "../services/supabase.js";
+import { supabase } from "../supabaseClient.js";
 
 const router = express.Router();
 
-/**
- * POST /createTwin
- */
 router.post("/", async (req, res) => {
   try {
     console.log("📥 Create Twin REQUEST BODY:", req.body);
 
     const { name, bio, user_id, image_url, audio_url } = req.body;
 
-    // ====== VALIDATION ======
-    if (!name || !bio || !user_id) {
-      console.log("❌ Missing required fields");
-      return res.status(400).json({ error: "Missing required fields" });
+    // Validation
+    if (!name || !bio || !user_id || !image_url || !audio_url) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields"
+      });
     }
 
-    if (!image_url || !audio_url) {
-      console.log("❌ Missing media URLs");
-      return res.status(400).json({ error: "Missing media URLs" });
-    }
-
-    // ====== GENERATE UNIQUE TWIN ID ======
+    // Generate ID
     const twinId = uuidv4();
-    console.log("🆔 Generated twinId:", twinId);
 
-    // ====== TWIN OBJECT ======
     const newTwin = {
       id: twinId,
-      unique_id: twinId, // ← חייב להיות זהה ל-ID שהדף יקבל
+      unique_id: twinId,
       name,
       bio,
       user_id,
       image_url,
       audio_url,
-      created_at: new Date().toISOString(),
+      created_at: new Date().toISOString()
     };
 
     console.log("📦 Twin to Insert:", newTwin);
 
-    // ====== SAVE TO SUPABASE ======
+    // Insert to Supabase
     const { data, error } = await supabase
-      .from("twins")
+      .from("aitwins")
       .insert([newTwin])
       .select()
       .single();
 
     if (error) {
       console.log("❌ Supabase Insert Error:", error);
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ success: false, error: error.message });
     }
 
     console.log("✅ Twin Saved to Supabase:", data);
 
-    // ====== RETURN CLEAN OBJECT TO BUBBLE ======
-    return res.status(200).json({
+    // Return clean JSON object
+    return res.json({
       success: true,
-      twin: data, // Bubble יקבל את ה-ID ישירות בתוך twin.id
+      twin_id: data.id,
+      twin_unique_id: data.unique_id,
+      twin_name: data.name,
+      twin_bio: data.bio,
+      twin_user_id: data.user_id,
+      twin_image_url: data.image_url,
+      twin_audio_url: data.audio_url,
+      created_at: data.created_at
     });
 
   } catch (err) {
-    console.log("🔥 SERVER ERROR:", err);
-    return res.status(500).json({
-      error: "Server error",
-      details: err.message,
-    });
+    console.error("❌ Create Twin SERVER ERROR:", err);
+    res.status(500).json({ success: false, error: "Server error" });
   }
 });
 
