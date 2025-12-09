@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
     }
 
     const { data, error } = await supabase
-      .from("twins") // ← תיקון כאן
+      .from("twins")
       .select("*")
       .eq("unique_id", unique_id)
       .single();
@@ -26,7 +26,8 @@ router.get("/", async (req, res) => {
       return res.status(404).json({ error: "Twin not found" });
     }
 
-    return res.json({ twin: data });
+    // 🔥 BUBBLE NEEDS FLAT JSON
+    return res.json(data);
 
   } catch (err) {
     console.error("❌ SERVER ERROR:", err);
