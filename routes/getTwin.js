@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
       return res.status(404).json({ error: "Twin not found" });
     }
 
-    // 🔥 BUBBLE NEEDS FLAT JSON
+    // 🔥 RETURN ONLY THE DATA — FLAT JSON
     return res.json(data);
 
   } catch (err) {
