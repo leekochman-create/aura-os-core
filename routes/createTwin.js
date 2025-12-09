@@ -1,6 +1,6 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
@@ -10,15 +10,13 @@ router.post("/", async (req, res) => {
 
     const { name, bio, user_id, image_url, audio_url } = req.body;
 
-    // Validation
     if (!name || !bio || !user_id || !image_url || !audio_url) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields"
+        error: "Missing required fields",
       });
     }
 
-    // Generate ID
     const twinId = uuidv4();
 
     const newTwin = {
@@ -29,12 +27,11 @@ router.post("/", async (req, res) => {
       user_id,
       image_url,
       audio_url,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     console.log("📦 Twin to Insert:", newTwin);
 
-    // Insert to Supabase
     const { data, error } = await supabase
       .from("aitwins")
       .insert([newTwin])
@@ -48,7 +45,6 @@ router.post("/", async (req, res) => {
 
     console.log("✅ Twin Saved to Supabase:", data);
 
-    // Return clean JSON object
     return res.json({
       success: true,
       twin_id: data.id,
@@ -58,9 +54,8 @@ router.post("/", async (req, res) => {
       twin_user_id: data.user_id,
       twin_image_url: data.image_url,
       twin_audio_url: data.audio_url,
-      created_at: data.created_at
+      created_at: data.created_at,
     });
-
   } catch (err) {
     console.error("❌ Create Twin SERVER ERROR:", err);
     res.status(500).json({ success: false, error: "Server error" });
