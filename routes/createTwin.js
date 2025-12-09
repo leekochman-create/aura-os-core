@@ -32,8 +32,9 @@ router.post("/", async (req, res) => {
 
     console.log("📦 Twin to Insert:", newTwin);
 
+    // ❗ הטבלה הנכונה היא twins
     const { data, error } = await supabase
-      .from("aitwins")
+      .from("twins")
       .insert([newTwin])
       .select()
       .single();
@@ -56,6 +57,7 @@ router.post("/", async (req, res) => {
       twin_audio_url: data.audio_url,
       created_at: data.created_at,
     });
+
   } catch (err) {
     console.error("❌ Create Twin SERVER ERROR:", err);
     res.status(500).json({ success: false, error: "Server error" });
