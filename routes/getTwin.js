@@ -3,30 +3,32 @@ import { supabase } from "../supabaseClient.js";
 
 const router = express.Router();
 
+// GET /twin?unique_id=xxxxxx
 router.get("/", async (req, res) => {
   try {
-    const { id } = req.query;
+    const { unique_id } = req.query;
 
-    console.log("🔎 Fetching twin:", id);
+    console.log("🔎 Fetching twin by unique_id:", unique_id);
 
-    if (!id) {
-      return res.status(400).json({ error: "Missing twin id" });
+    if (!unique_id) {
+      return res.status(400).json({ error: "Missing unique_id" });
     }
 
-    // Use maybeSingle to avoid errors when 0 rows returned
+    // Use maybeSingle to avoid errors when no rows returned
     const { data, error } = await supabase
       .from("aitwins")
       .select("*")
-      .eq("id", id)
-      .maybeSingle();
+      .eq("unique_id", unique_id)
+      .maybeSingle(); // ← prevents 'Cannot coerce' error
 
     if (error) {
-      console.log("❌ Supabase Error:", error);
+      console.log("❌ Supabase Twin Error:", error);
       return res.status(500).json({ error: error.message });
     }
 
+    // If no twin found
     if (!data) {
-      console.log("⚠️ Twin not found in database");
+      console.log("⚠️ Twin not found in DB");
       return res.status(404).json({ error: "Twin not found" });
     }
 
