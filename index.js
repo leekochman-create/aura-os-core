@@ -1,36 +1,26 @@
 import express from "express";
 import cors from "cors";
 
-// ==== ROUTES ==== 
 import createTwinRoute from "./routes/createTwin.js";
-import speakRoute from "./routes/speak.js";
-import twinRoute from "./routes/twin.js";
-import uploadRoute from "./routes/upload.js";
+import getTwinRoute from "./routes/getTwin.js";
 
 const app = express();
 
-// ====== CORS ======
+// Middlewares
 app.use(cors());
+app.use(express.json());
 
-// ❗ חשוב: upload לפני JSON אחרת הקבצים לא יתקבלו
-app.use("/upload", uploadRoute);
+// Routes
+app.use("/create_twin", createTwinRoute);
+app.use("/get_twin", getTwinRoute);
 
-// ====== JSON ======
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true }));
-
-// ====== API ROUTES ======
-app.use("/createTwin", createTwinRoute);
-app.use("/speak", speakRoute);
-app.use("/twin", twinRoute);
-
-// ====== TEST ROUTE ======
+// Test route
 app.get("/", (req, res) => {
-  res.send("AURA OS CORE API IS RUNNING ✔️");
+  res.send("AURA OS CORE API IS RUNNING ✔");
 });
 
-// ====== START SERVER ======
-const PORT = process.env.PORT || 10000;
+// Server start
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("🔥 AURA BACKEND RUNNING ON PORT " + PORT);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
