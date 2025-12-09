@@ -3,6 +3,7 @@ import cors from "cors";
 
 import createTwinRoute from "./routes/createTwin.js";
 import getTwinRoute from "./routes/getTwin.js";
+import uploadMediaRoute from "./routes/uploadMedia.js";   // ← חייבים להוסיף
 
 const app = express();
 
@@ -13,6 +14,10 @@ app.use(express.json());
 // Routes
 app.use("/create_twin", createTwinRoute);
 app.use("/get_twin", getTwinRoute);
+app.use("/upload", uploadMediaRoute);   // ← זה יוצר את הנתיבים:
+// POST /upload/image
+// POST /upload/audio
+// POST /upload/video
 
 // Test route
 app.get("/", (req, res) => {
