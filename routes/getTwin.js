@@ -1,9 +1,9 @@
 import express from "express";
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
-// GET /twin?unique_id=xxxxxx
+// GET /get_twin?unique_id=xxxxx
 router.get("/", async (req, res) => {
   try {
     const { unique_id } = req.query;
@@ -14,21 +14,19 @@ router.get("/", async (req, res) => {
       return res.status(400).json({ error: "Missing unique_id" });
     }
 
-    // Use maybeSingle to avoid errors when no rows returned
     const { data, error } = await supabase
       .from("aitwins")
       .select("*")
       .eq("unique_id", unique_id)
-      .maybeSingle(); // ← prevents 'Cannot coerce' error
+      .maybeSingle(); // ← מונע את השגיאה שראית
 
     if (error) {
-      console.log("❌ Supabase Twin Error:", error);
+      console.log("❌ Supabase Error:", error);
       return res.status(500).json({ error: error.message });
     }
 
-    // If no twin found
     if (!data) {
-      console.log("⚠️ Twin not found in DB");
+      console.log("⚠️ Twin not found");
       return res.status(404).json({ error: "Twin not found" });
     }
 
@@ -36,9 +34,8 @@ router.get("/", async (req, res) => {
 
     return res.json({
       success: true,
-      twin: data
+      twin: data,
     });
-
   } catch (err) {
     console.error("❌ Get Twin SERVER ERROR:", err);
     res.status(500).json({ error: "Server error" });
