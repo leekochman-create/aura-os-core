@@ -1,46 +1,54 @@
 import express from "express";
-import { supabase } from "../services/supabase.js";
+import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
+import { supabase } from "../supabaseClient.js";
+
+const upload = multer();
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/createTwin", upload.fields([
+  { name: "image_file", maxCount: 1 },
+  { name: "audio_file", maxCount: 1 }
+]), async (req, res) => {
   try {
-    const { name, bio, user_id, image_url, audio_url } = req.body;
+    console.log("📥 Incoming CreateTwin:", req.body, req.files);
 
-    if (!name || !bio || !user_id) {
-      return res.status(400).json({ error: "Missing required fields" });
+    const { name, bio, user_id } = req.body;
+
+    if (!req.files.image_file || !req.files.audio_file) {
+      return res.status(400).json({ error: "Missing uploads" });
     }
 
-    if (!image_url || !audio_url) {
-      return res.status(400).json({ error: "Missing media URLs" });
-    }
+    const imageBuffer = req.files.image_file[0].buffer;
+    const audioBuffer = req.files.audio_file[0].buffer;
 
-    const newTwin = {
-      id: uuidv4(),
+    const twinId = uuidv4();
+
+    const imagePath = `twins/images/${twinId}.png`;
+    const audioPath = `twins/audio/${twinId}.mp3`;
+
+    await supabase.storage.from("twins").upload(imagePath, imageBuffer, { contentType: "image/png" });
+    await supabase.storage.from("twins").upload(audioPath, audioBuffer, { contentType: "audio/mpeg" });
+
+    const imageUrl = supabase.storage.from("twins").getPublicUrl(imagePath).data.publicUrl;
+    const audioUrl = supabase.storage.from("twins").getPublicUrl(audioPath).data.publicUrl;
+
+    const { error } = await supabase.from("twins").insert({
+      id: twinId,
       name,
       bio,
       user_id,
-      image_url,
-      audio_url,
-      created_at: new Date().toISOString(),
-    };
-
-    // 👇 שים לב! הטבלה הנכונה twins
-    const { error } = await supabase.from("twins").insert(newTwin);
-
-    if (error) {
-      console.error("Supabase Insert Error:", error);
-      return res.status(500).json({ error: "Failed to create twin" });
-    }
-
-    return res.json({
-      success: true,
-      twin: newTwin,
+      image_url: imageUrl,
+      audio_url: audioUrl
     });
+
+    if (error) throw error;
+
+    return res.json({ success: true, id: twinId });
   } catch (e) {
-    console.error("CREATE TWIN ERROR:", e);
-    return res.status(500).json({ error: "Server error" });
+    console.error("❌ CreateTwin ERROR:", e);
+    return res.status(500).json({ error: e.message });
   }
 });
 
