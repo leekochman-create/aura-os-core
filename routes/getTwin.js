@@ -1,20 +1,20 @@
 import express from "express";
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const userId = req.query.user_id;
+    const user_id = req.query.user_id;
 
-    if (!userId) {
+    if (!user_id) {
       return res.status(400).json({ error: "Missing user_id" });
     }
 
     const { data, error } = await supabase
-      .from("aitwins")
+      .from("Aitwins")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", user_id)
       .single();
 
     if (error || !data) {
@@ -28,9 +28,8 @@ router.get("/", async (req, res) => {
       found: true,
       twin: data,
     });
-
-  } catch (err) {
-    console.error("❌ GET TWIN ERROR:", err);
+  } catch (e) {
+    console.error("GET_TWIN ERROR:", e);
     return res.status(500).json({ error: "Server error" });
   }
 });
