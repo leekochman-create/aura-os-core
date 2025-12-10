@@ -3,7 +3,8 @@ import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+// מקבל גם / וגם בלי /
+router.get(["/", ""], async (req, res) => {
   try {
     const user_id = req.query.user_id;
 
