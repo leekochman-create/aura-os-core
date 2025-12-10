@@ -1,15 +1,18 @@
-import express from "express";
-import { supabase } from "../services/supabase.js";
-
-const router = express.Router();
-
-// מקבל גם / וגם בלי /
 router.get(["/", ""], async (req, res) => {
   try {
     const user_id = req.query.user_id;
 
+    // מאפשר לבאבל לעשות initialize בלי פרמטר
     if (!user_id) {
-      return res.status(400).json({ error: "Missing user_id" });
+      return res.json({
+        found: false,
+        message: "No user_id provided",
+        sample: {
+          id: "12345",
+          name: "Sample Twin",
+          bio: "Example Bio",
+        }
+      });
     }
 
     const { data, error } = await supabase
@@ -29,10 +32,9 @@ router.get(["/", ""], async (req, res) => {
       found: true,
       twin: data,
     });
+
   } catch (e) {
     console.error("GET_TWIN ERROR:", e);
     return res.status(500).json({ error: "Server error" });
   }
 });
-
-export default router;
