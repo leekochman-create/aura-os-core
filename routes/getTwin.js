@@ -1,3 +1,8 @@
+import express from "express";
+import { supabase } from "../supabaseClient.js";
+
+const router = express.Router();
+
 router.get("/", async (req, res) => {
   try {
     const userId = req.query.user_id;
@@ -15,17 +20,19 @@ router.get("/", async (req, res) => {
     if (error || !data) {
       return res.json({
         found: false,
-        message: "Twin not found for this user"
+        message: "Twin not found",
       });
     }
 
     return res.json({
       found: true,
-      twin: data
+      twin: data,
     });
 
   } catch (err) {
-    console.error("GET_TWIN ERROR:", err);
+    console.error("❌ GET TWIN ERROR:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
+
+export default router;
