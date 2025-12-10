@@ -1,8 +1,13 @@
+import express from "express";
+import { supabase } from "../services/supabase.js";
+
+const router = express.Router();
+
 router.get(["/", ""], async (req, res) => {
   try {
     const user_id = req.query.user_id;
 
-    // מאפשר לבאבל לעשות initialize בלי פרמטר
+    // מאפשר לבאבל לעשות Initialize
     if (!user_id) {
       return res.json({
         found: false,
@@ -10,8 +15,8 @@ router.get(["/", ""], async (req, res) => {
         sample: {
           id: "12345",
           name: "Sample Twin",
-          bio: "Example Bio",
-        }
+          bio: "Example bio for Bubble initialize",
+        },
       });
     }
 
@@ -38,3 +43,6 @@ router.get(["/", ""], async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 });
+
+// ❗ חשוב! זה מה שחסר לפי Render
+export default router;
