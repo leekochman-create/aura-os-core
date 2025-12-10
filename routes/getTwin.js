@@ -7,6 +7,8 @@ router.get("/getTwin", async (req, res) => {
   try {
     const user_id = req.query.user_id;
 
+    console.log("🔥 GET TWIN REQUEST user_id:", user_id);
+
     if (!user_id) {
       return res.status(400).json({ error: "Missing user_id" });
     }
@@ -14,10 +16,15 @@ router.get("/getTwin", async (req, res) => {
     const { data, error } = await supabase
       .from("Aitwins")
       .select("*")
-      .eq("user_id", user_id)
-      .single();
+      .eq("user_id", user_id);
 
-    if (error || !data) {
+    console.log("📌 Supabase result:", data, error);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    if (!data || data.length === 0) {
       return res.json({
         found: false,
         message: "Twin not found",
@@ -26,8 +33,9 @@ router.get("/getTwin", async (req, res) => {
 
     return res.json({
       found: true,
-      twin: data,
+      twin: data[0],
     });
+
   } catch (e) {
     console.error("GET_TWIN ERROR:", e);
     return res.status(500).json({ error: "Server error" });
