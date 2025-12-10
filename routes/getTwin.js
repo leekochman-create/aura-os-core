@@ -1,43 +1,31 @@
-import express from "express";
-import { supabase } from "../services/supabase.js";
-
-const router = express.Router();
-
 router.get("/", async (req, res) => {
   try {
-    const unique_id = req.query.unique_id;
+    const userId = req.query.user_id;
 
-    if (!unique_id) {
-      return res.status(400).json({ error: "Missing unique_id parameter" });
+    if (!userId) {
+      return res.status(400).json({ error: "Missing user_id" });
     }
 
     const { data, error } = await supabase
-      .from("twins")
+      .from("aitwins")
       .select("*")
-      .eq("unique_id", unique_id)
-      .maybeSingle(); // ← יותר בטוח מ-single()
+      .eq("user_id", userId)
+      .single();
 
-    if (error) {
-      console.error("Supabase error:", error);
-      return res.status(500).json({ error: error.message });
-    }
-
-    if (!data) {
+    if (error || !data) {
       return res.json({
         found: false,
-        message: "Twin not found",
+        message: "Twin not found for this user"
       });
     }
 
     return res.json({
       found: true,
-      ...data,
+      twin: data
     });
 
   } catch (err) {
-    console.error("SERVER ERROR:", err);
+    console.error("GET_TWIN ERROR:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
-
-export default router;
