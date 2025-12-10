@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 import { supabase } from "../supabaseClient.js";
 
 const upload = multer();
-
 const router = express.Router();
 
 router.post("/createTwin", upload.fields([
@@ -28,11 +27,23 @@ router.post("/createTwin", upload.fields([
     const imagePath = `twins/images/${twinId}.png`;
     const audioPath = `twins/audio/${twinId}.mp3`;
 
-    await supabase.storage.from("twins").upload(imagePath, imageBuffer, { contentType: "image/png" });
-    await supabase.storage.from("twins").upload(audioPath, audioBuffer, { contentType: "audio/mpeg" });
+    // Upload image
+    await supabase.storage.from("twins").upload(imagePath, imageBuffer, {
+      contentType: "image/png"
+    });
 
-    const imageUrl = supabase.storage.from("twins").getPublicUrl(imagePath).data.publicUrl;
-    const audioUrl = supabase.storage.from("twins").getPublicUrl(audioPath).data.publicUrl;
+    // Upload audio
+    await supabase.storage.from("twins").upload(audioPath, audioBuffer, {
+      contentType: "audio/mpeg"
+    });
+
+    const imageUrl = supabase.storage
+      .from("twins")
+      .getPublicUrl(imagePath).data.publicUrl;
+
+    const audioUrl = supabase.storage
+      .from("twins")
+      .getPublicUrl(audioPath).data.publicUrl;
 
     const { error } = await supabase.from("twins").insert({
       id: twinId,
@@ -46,6 +57,7 @@ router.post("/createTwin", upload.fields([
     if (error) throw error;
 
     return res.json({ success: true, id: twinId });
+
   } catch (e) {
     console.error("❌ CreateTwin ERROR:", e);
     return res.status(500).json({ error: e.message });
