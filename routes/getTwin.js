@@ -3,16 +3,12 @@ import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/getTwin", async (req, res) => {
   try {
     const user_id = req.query.user_id;
 
     if (!user_id) {
-      return res.status(400).json({
-        found: false,
-        message: "Missing user_id",
-        twin: null
-      });
+      return res.status(400).json({ error: "Missing user_id" });
     }
 
     const { data, error } = await supabase
@@ -25,31 +21,16 @@ router.get("/", async (req, res) => {
       return res.json({
         found: false,
         message: "Twin not found",
-        twin: null
       });
     }
 
     return res.json({
       found: true,
-      message: "Twin found",
-      twin: {
-        id: data.id,
-        name: data.name,
-        bio: data.bio,
-        image_url: data.image_url,
-        audio_url: data.audio_url,
-        user_id: data.user_id,
-        created_at: data.created_at
-      }
+      twin: data,
     });
-
-  } catch (err) {
-    console.error("GET_TWIN ERROR:", err);
-    return res.status(500).json({
-      found: false,
-      message: "Server error",
-      twin: null
-    });
+  } catch (e) {
+    console.error("GET_TWIN ERROR:", e);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
