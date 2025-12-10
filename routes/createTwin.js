@@ -1,27 +1,23 @@
 import express from "express";
-import { v4 as uuidv4 } from "uuid";
 import { supabase } from "../services/supabase.js";
+import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    console.log("📥 Create Twin REQUEST BODY:", req.body);
-
     const { name, bio, user_id, image_url, audio_url } = req.body;
 
-    if (!name || !bio || !user_id || !image_url || !audio_url) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing required fields",
-      });
+    if (!name || !bio || !user_id) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const twinId = uuidv4();
+    if (!image_url || !audio_url) {
+      return res.status(400).json({ error: "Missing media URLs" });
+    }
 
     const newTwin = {
-      id: twinId,
-      unique_id: twinId,
+      id: uuidv4(),
       name,
       bio,
       user_id,
@@ -30,37 +26,20 @@ router.post("/", async (req, res) => {
       created_at: new Date().toISOString(),
     };
 
-    console.log("📦 Twin to Insert:", newTwin);
-
-    // ❗ הטבלה הנכונה היא twins
-    const { data, error } = await supabase
-      .from("twins")
-      .insert([newTwin])
-      .select()
-      .single();
+    const { error } = await supabase.from("Aitwins").insert(newTwin);
 
     if (error) {
-      console.log("❌ Supabase Insert Error:", error);
-      return res.status(500).json({ success: false, error: error.message });
+      console.error("Supabase Insert Error:", error);
+      return res.status(500).json({ error: "Failed to create twin" });
     }
-
-    console.log("✅ Twin Saved to Supabase:", data);
 
     return res.json({
       success: true,
-      twin_id: data.id,
-      twin_unique_id: data.unique_id,
-      twin_name: data.name,
-      twin_bio: data.bio,
-      twin_user_id: data.user_id,
-      twin_image_url: data.image_url,
-      twin_audio_url: data.audio_url,
-      created_at: data.created_at,
+      twin: newTwin,
     });
-
-  } catch (err) {
-    console.error("❌ Create Twin SERVER ERROR:", err);
-    res.status(500).json({ success: false, error: "Server error" });
+  } catch (e) {
+    console.error("CREATE TWIN ERROR:", e);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
