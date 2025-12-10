@@ -13,8 +13,9 @@ router.get("/getTwin", async (req, res) => {
       return res.status(400).json({ error: "Missing user_id" });
     }
 
+    // ❗ שינוי חשוב — הטבלה הנכונה היא EXACTLY: twins
     const { data, error } = await supabase
-      .from("Aitwins")
+      .from("twins")
       .select("*")
       .eq("user_id", user_id);
 
