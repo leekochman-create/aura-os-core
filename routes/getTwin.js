@@ -3,20 +3,15 @@ import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
-router.get(["/", ""], async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const user_id = req.query.user_id;
 
-    // מאפשר לבאבל לעשות Initialize
     if (!user_id) {
-      return res.json({
+      return res.status(400).json({
         found: false,
-        message: "No user_id provided",
-        sample: {
-          id: "12345",
-          name: "Sample Twin",
-          bio: "Example bio for Bubble initialize",
-        },
+        message: "Missing user_id",
+        twin: null
       });
     }
 
@@ -30,19 +25,32 @@ router.get(["/", ""], async (req, res) => {
       return res.json({
         found: false,
         message: "Twin not found",
+        twin: null
       });
     }
 
     return res.json({
       found: true,
-      twin: data,
+      message: "Twin found",
+      twin: {
+        id: data.id,
+        name: data.name,
+        bio: data.bio,
+        image_url: data.image_url,
+        audio_url: data.audio_url,
+        user_id: data.user_id,
+        created_at: data.created_at
+      }
     });
 
-  } catch (e) {
-    console.error("GET_TWIN ERROR:", e);
-    return res.status(500).json({ error: "Server error" });
+  } catch (err) {
+    console.error("GET_TWIN ERROR:", err);
+    return res.status(500).json({
+      found: false,
+      message: "Server error",
+      twin: null
+    });
   }
 });
 
-// ❗ חשוב! זה מה שחסר לפי Render
 export default router;
