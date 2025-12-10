@@ -1,21 +1,39 @@
 import express from "express";
-import cors from "cors";
+import { supabase } from "../services/supabase.js";
 
-import createTwinRoute from "./routes/createTwin.js";
-import getTwinRoute from "./routes/getTwin.js";
+const router = express.Router();
 
-const app = express();
+router.get("/", async (req, res) => {
+  try {
+    const user_id = req.query.user_id;
 
-app.use(cors());
-app.use(express.json());
+    if (!user_id) {
+      return res.status(400).json({ error: "Missing user_id" });
+    }
 
-// Routes
-app.use("/create_twin", createTwinRoute);
-app.use("/get_twin", getTwinRoute);
+    const { data, error } = await supabase
+      .from("Aitwins")
+      .select("*")
+      .eq("user_id", user_id)
+      .single();
 
-app.get("/", (req, res) => {
-  res.send("AURA OS CORE API RUNNING");
+    if (error || !data) {
+      return res.json({
+        found: false,
+        message: "Twin not found",
+        twin: null
+      });
+    }
+
+    return res.json({
+      found: true,
+      message: "Twin found",
+      twin: data
+    });
+  } catch (e) {
+    console.error("GET_TWIN ERROR:", e);
+    return res.status(500).json({ error: "Server error" });
+  }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on " + PORT));
+export default router;
