@@ -26,7 +26,8 @@ router.post("/", async (req, res) => {
       created_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase.from("Aitwins").insert(newTwin);
+    // 👇 שים לב! הטבלה הנכונה twins
+    const { error } = await supabase.from("twins").insert(newTwin);
 
     if (error) {
       console.error("Supabase Insert Error:", error);
