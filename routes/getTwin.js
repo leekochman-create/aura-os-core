@@ -15,21 +15,27 @@ router.get("/", async (req, res) => {
       .from("twins")
       .select("*")
       .eq("unique_id", unique_id)
-      .single();
+      .maybeSingle(); // ← יותר בטוח מ-single()
 
     if (error) {
-      console.error("❌ Supabase Twin Error:", error);
+      console.error("Supabase error:", error);
       return res.status(500).json({ error: error.message });
     }
 
     if (!data) {
-      return res.status(404).json({ error: "Twin not found" });
+      return res.json({
+        found: false,
+        message: "Twin not found",
+      });
     }
 
-    return res.json(data);   // ← ← ← ***זה התיקון החשוב***
+    return res.json({
+      found: true,
+      ...data,
+    });
 
   } catch (err) {
-    console.error("❌ SERVER ERROR:", err);
+    console.error("SERVER ERROR:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
