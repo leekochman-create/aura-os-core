@@ -26,8 +26,7 @@ router.get("/", async (req, res) => {
       return res.status(404).json({ error: "Twin not found" });
     }
 
-    // 🔥 RETURN ONLY THE DATA — FLAT JSON
-    return res.json(data);
+    return res.json(data);   // ← ← ← ***זה התיקון החשוב***
 
   } catch (err) {
     console.error("❌ SERVER ERROR:", err);
